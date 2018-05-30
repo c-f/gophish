@@ -169,7 +169,7 @@ func setupContext(r *http.Request) (error, *http.Request) {
 		log.Error(err)
 		return err, r
 	}
-	id := r.Form.Get(models.RecipientParameter)
+	id := gatherRecipientParameter(r)
 	if id == "" {
 		return ErrInvalidRequest, r
 	}
@@ -211,4 +211,14 @@ func setupContext(r *http.Request) (error, *http.Request) {
 	r = ctx.Set(r, "campaign", c)
 	r = ctx.Set(r, "details", d)
 	return nil, r
+}
+
+// gatherRecipientParameter searched in various places for the RecipientParameter
+func gatherRecipientParameter(r *http.Request) (id string) {
+	id = r.Form.Get(models.RecipientParameter)
+	if id == "" {
+		// http.ErrNoCookie do not need to be handled
+		id, _ = r.Cookie(models.RecipientParameter)
+	}
+	return
 }
